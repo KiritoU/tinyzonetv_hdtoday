@@ -158,9 +158,11 @@ class HDToday:
 
             return post_id
         except Exception as e:
-            print(e)
+            helper.error_log(
+                f'Failed to insert film: {post_data.get("title", "")}\n{e}',
+                "hdtoday.insert_movie.log",
+            )
             return 0
-            # helper.error_log(f"Failed to insert film")
 
     def insert_root_film(self) -> list:
         condition = (
