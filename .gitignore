@@ -6,4 +6,3 @@ settings.py
 venv
 .vscode
 json
-_clear_db.py
