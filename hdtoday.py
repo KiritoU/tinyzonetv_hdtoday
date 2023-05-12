@@ -17,11 +17,7 @@ logging.basicConfig(format="%(asctime)s %(levelname)s:%(message)s", level=loggin
 class HDToday:
     def __init__(self, film: dict, episodes: dict):
         self.film = film
-        self.film["quality"] = (
-            "HD"
-            if "Quality" not in self.film["extra_info"].keys()
-            else self.film["extra_info"]["Quality"]
-        )
+        self.film["quality"] = self.film["extra_info"].get("quality", "HD")
         self.film["origin_cover_src"] = self.film["cover_src"]
         self.episodes = episodes
         self.download_cover()
@@ -181,7 +177,7 @@ class HDToday:
                 "trailer": ""
                 if not post_data.get("title", "")
                 else "https://www.youtube.com/embed/" + post_data.get("youtube_id", ""),
-                "quality": post_data.get("quality", ""),
+                "quality": post_data.get("quality", "HD"),
                 "year": self.get_year_from(post_data.get("year", 0)),
                 "slug": post_data.get("slug", ""),
                 "content": post_data.get("description", ""),
@@ -252,6 +248,7 @@ class HDToday:
         self.movie_episodes = res
 
     def get_server_name_from(self, link: str) -> str:
+        return "VIDCLOUD"
         x = re.search(r"//[^/]*", link)
         if x:
             return x.group().replace("//", "")
