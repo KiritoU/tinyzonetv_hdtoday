@@ -1,6 +1,7 @@
 import json
 import logging
 import sys
+from pathlib import Path
 
 from bs4 import BeautifulSoup
 
@@ -9,6 +10,7 @@ from helper import helper
 from settings import CONFIG
 
 logging.basicConfig(format="%(asctime)s %(levelname)s:%(message)s", level=logging.INFO)
+Path(CONFIG.COVER_SAVE_PATH).mkdir(parents=True, exist_ok=True)
 
 
 class Crawler:

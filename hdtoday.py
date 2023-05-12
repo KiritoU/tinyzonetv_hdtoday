@@ -2,7 +2,9 @@ import json
 import logging
 import re
 from datetime import datetime, timedelta
+from pathlib import Path
 
+import requests
 from slugify import slugify
 
 from _db import database
@@ -20,7 +22,48 @@ class HDToday:
             if "Quality" not in self.film["extra_info"].keys()
             else self.film["extra_info"]["Quality"]
         )
+        self.film["origin_cover_src"] = self.film["cover_src"]
         self.episodes = episodes
+        self.download_cover()
+
+    def get_header(self):
+        header = {
+            "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E150",  # noqa: E501
+            "Accept-Encoding": "gzip, deflate",
+            # "Cookie": CONFIG.COOKIE,
+            "Cache-Control": "max-age=0",
+            "Accept-Language": "vi-VN",
+            # "Referer": "https://mangabuddy.com/",
+        }
+        return header
+
+    def download_url(self, url):
+        return requests.get(url, headers=self.get_header())
+
+    def save_thumb(
+        self,
+        imageUrl: str,
+        imageName: str = "0.jpg",
+    ) -> str:
+        Path(CONFIG.COVER_SAVE_PATH).mkdir(parents=True, exist_ok=True)
+        saveImage = f"{CONFIG.COVER_SAVE_PATH}/covers/{imageName}"
+
+        isNotSaved = not Path(saveImage).is_file()
+        if isNotSaved:
+            image = self.download_url(imageUrl)
+            with open(saveImage, "wb") as f:
+                f.write(image.content)
+            isNotSaved = True
+
+        return f"{CONFIG.DOMAIN_NAME}/covers/{imageName}"
+
+    def download_cover(self) -> None:
+        cover_url = self.film["cover_src"]
+        image_extension = cover_url.split("/")[-1].split(".")[-1]
+        if image_extension:
+            downloaded_cover_name = f"{self.film['slug']}.{image_extension}"
+            downloaded_cover_url = self.save_thumb(cover_url, downloaded_cover_name)
+            self.film["cover_src"] = downloaded_cover_url
 
     def get_season_number(self, season_str: str) -> str:
         season_str = season_str.replace("\n", " ").lower()
